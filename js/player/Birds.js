@@ -116,7 +116,7 @@ export class Birds extends Sprite {
   }
 
   /**
-   *
+   * 改变此小鸟的一些信息
    * @param lastX 终点的x坐标
    * @param lastY 终点的y坐标
    * @param number 小鸟序号

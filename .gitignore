@@ -11,3 +11,10 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+/.idea
+.idea/workspace.xml
+.idea/watcherTasks.xml
+.idea/vcs.xml
+.idea/modules.xml
+.idea/misc.xml
+.idea/chicken-game.iml
