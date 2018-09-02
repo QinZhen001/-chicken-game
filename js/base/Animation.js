@@ -1,7 +1,8 @@
-import {DataStore} from './DataStore.js'
 /**
  * 简易的帧动画类实现
  */
+import {DataStore} from './DataStore.js'
+
 export class Animation {
 
   static getInstance() {
@@ -51,7 +52,7 @@ export class Animation {
         0, 0,
         img.width, img.height,
         this.x, this.y,
-        img.width, img.height
+        img.width * 2, img.height * 2
     )
   }
 

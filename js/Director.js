@@ -1,6 +1,6 @@
 // 导演类，控制游戏逻辑
 import {DataStore} from './base/DataStore.js'
-// import {Animation} from './base/Animation'
+import {Animation} from './base/Animation'
 import {BackGround} from './runtime/BackGround'
 import {Birds} from './player/Birds.js'
 import {ButtonA} from './runtime/ButtonA'
@@ -31,14 +31,19 @@ export class Director {
       this.dataStore.get('background').render()
       let len = this.dataStore.get('birdsNum')
       for (let i = 1; i <= len; i++) {
-        this.dataStore.get(`bird${i}`).initDraw()
+        this.dataStore.get(`bird${i}`).draw()
       }
       this.dataStore.get('buttonA').draw()
       this.dataStore.get('buttonB').draw()
       this.drawText()
 
       if (this.dataStore.get('showStoneFlag')) {
-        this.dataStore.get('stone').draw()
+        let stone = this.dataStore.get('stone')
+        stone.draw()
+        if (stone.y < 0 - stone.height) {
+          this.dataStore.put('showStoneFlag', false)
+          this.dataStore.delete('stone')
+        }
       }
 
       let timer = requestAnimationFrame(() => this.run())
@@ -110,18 +115,9 @@ export class Director {
     let orginBird = this.dataStore.get('bird1')
     if (orginBird.location === 'left' || !orginBird.text.includes('用户'))
       return
+
     let targetBird = this.dataStore.get('bird17')
-    let tempBird = {}
-
-    tempBird.birdsX = orginBird.birdsX
-    tempBird.birdsY = orginBird.birdsY
-    tempBird.location = orginBird.location
-    tempBird.number = orginBird.number
-
-
-    orginBird.change(targetBird.birdsX[0], targetBird.birdsY[0], targetBird.number, targetBird.location)
-    targetBird.change(tempBird.birdsX[0], tempBird.birdsY[0], tempBird.number, tempBird.location)
-
+    this.changeBirdLoc(orginBird, targetBird)
   }
 
   onClickBtnB() {
@@ -129,6 +125,11 @@ export class Director {
     if (orginBird.location === 'right' || !orginBird.text.includes('用户'))
       return
     let targetBird = this.dataStore.get('bird17')
+    this.changeBirdLoc(orginBird, targetBird)
+  }
+
+
+  changeBirdLoc(orginBird, targetBird) {
     let tempBird = {}
 
     tempBird.birdsX = orginBird.birdsX
@@ -136,14 +137,23 @@ export class Director {
     tempBird.location = orginBird.location
     tempBird.number = orginBird.number
 
-
     orginBird.change(targetBird.birdsX[0], targetBird.birdsY[0], targetBird.number, targetBird.location)
+    //改变userLocation的逻辑要放在这
+    this.changeUserLoc(targetBird.location)
+
     targetBird.change(tempBird.birdsX[0], tempBird.birdsY[0], tempBird.number, tempBird.location)
+    // console.log(this.dataStore.get('userLocation'))
+  }
+
+  changeUserLoc(location) {
+    this.dataStore.put('userLocation', location)
   }
 
 
   onClickCallStone() {
-    this.dataStore.put('showStoneFlag', true)
+    this.dataStore
+        .put('stone', Stone)
+        .put('showStoneFlag', true)
   }
 
   restart() {
@@ -155,8 +165,8 @@ export class Director {
         .put('background', BackGround)
         .put('buttonA', ButtonA)
         .put('buttonB', ButtonB)
-        .put('stone', Stone)
         .put('startButton', StartButton)
+        .put('stone', new Stone())
         .put('bird1', new Birds(10, thirdY, "用户", 1))    //小鸟的宽是34 高24
         .put('bird2', new Birds(10 + 34 + 25, thirdY, "其他", 2))    //小鸟和小鸟之间的间距是25
         .put('bird3', new Birds(10 + 34 + 25 + 34 + 25, thirdY, "其他", 3))
@@ -177,6 +187,7 @@ export class Director {
         .put('bird18', new Birds(375 - 10 - 34, firstY, "其他", 18))
         .put('birdsNum', 18)
         .put('showStoneFlag', false)
+        .put('userLocation', 'left')
 
     this.isGameOver = false
     this.run();
@@ -193,17 +204,13 @@ export class Director {
 
   //判断游戏是否结束
   checkIsGameOver() {
-    // 小鸟边框模型
-    let bird = this.dataStore.get('bird2')
-    const birdsBorder = {
-      top: bird.birdsY[0],
-      bottom: bird.birdsY[0] + bird.birdHeight[0],
-      left: bird.birdsX[0],
-      right: bird.birdsX[0] + bird.birdsWidth[0]
-    }
+    let stone = this.dataStore.get('stone')
+    if (!stone)
+      return
+    if (stone.location !== this.dataStore.get('userLocation'))
+      return
 
     //撞击物的边框模型
-    let stone = this.dataStore.get('stone')
     const StoneBorder = {
       top: stone.y,
       bottom: stone.y + stone.height,
@@ -211,8 +218,21 @@ export class Director {
       right: stone.x + stone.width
     }
 
+    // 小鸟边框模型 (如果当前userLocation是left就使用bird2 是right就用bird5)
+    let bird =
+        this.dataStore.get('userLocation') === 'left' ?
+            this.dataStore.get('bird2') :
+            this.dataStore.get('bird5')
 
-    if (Director.isStrike(birdsBorder, StoneBorder)) {
+    const birdsBorder = {
+      top: bird.birdsY[0],
+      bottom: bird.birdsY[0] + bird.birdsHeight[0],
+      left: bird.birdsX[0],
+      right: bird.birdsX[0] + bird.birdsWidth[0]
+    }
+
+
+    if (this.isStrike(birdsBorder, StoneBorder)) {
       console.log('撞到了');
       this.isGameOver = true;
       return
@@ -224,9 +244,7 @@ export class Director {
    * 简单的碰撞检测定义：
    * 小的精灵的中心点处于大的精灵所在的矩形内即可
    */
-  static isStrike(bird, stone) {
-
-    // const spX = bird.top + sp.width / 2
+  isStrike(bird, stone) {
     const spX = bird.left + (bird.right - bird.left) / 2
     const spY = bird.top + (bird.bottom - bird.top) / 2
 
@@ -236,16 +254,22 @@ export class Director {
         spY >= stone.top &&
         spY <= stone.bottom
     ) {
+      //开启撞击动画
+      this.startExplosionAnimation(bird.left - 32, bird.top - 32)
       return true
     }
-
     return false
   }
 
+  startExplosionAnimation(x, y) {
+    this.animation.playAnimation(x, y)
+  }
 
-  // initAnimation() {
-  //   this.animation = Animation.getInstance()
-  //   this.dataStore.get('stone').initExplosionAnimation()
-  // }
+
+  //初始化动画相关
+  initAnimation() {
+    this.animation = Animation.getInstance()
+    Stone.initExplosionAnimation()
+  }
 
 }

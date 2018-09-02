@@ -6,33 +6,36 @@ const screenHeight = window.innerHeight
 
 
 export class Stone extends Sprite {
-  constructor() {
+  constructor(location) {
     const image = Sprite.getImage('stone')
     super(image,
-        0, 0,
+        screenWidth, screenHeight,
         image.width, image.height,
-        20, screenHeight,
+        screenWidth, screenHeight,
         image.width / 1.5, image.height / 1.5
     )
+    const LocArr = ['left', 'right']
+    this.location = location ? location : LocArr[Math.round(Math.random())]   //出现的位置 left 或 right
+    this.moveSpeed = Director.getInstance().moveSpeed
     this.time = 0
   }
 
 
   draw() {
-    let moveY = Director.getInstance().moveSpeed
-    this.y = screenHeight - moveY * this.time
-
+    this.y = screenHeight - this.moveSpeed * this.time
+    this.x = this.location === 'left' ? 20 : (screenWidth - 20 - this.img.width / 1.5)
     super.draw(this.img,
         0, 0,
         this.img.width, this.img.height,
-        20, this.y,
+        this.x, this.y,
         this.img.width / 1.5, this.img.height / 1.5)
 
     this.time++
   }
 
 
-  initExplosionAnimation() {
+  //类方法 初始化爆炸动画
+  static initExplosionAnimation() {
     let frames = []
     const EXPLO_IMG_PREFIX = 'images/explosion'
     const EXPLO_FRAME_COUNT = 19

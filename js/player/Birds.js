@@ -6,7 +6,7 @@ import {getRandomDecimal} from '../util/index'
 
 
 export class Birds extends Sprite {
-  //传入终点坐标
+  //传入要到达点的坐标 小鸟下方绘制的文字 小鸟序号
   constructor(lastX = 10, lastY = 400, text = "其他", number) {
     const image = Sprite.getImage('birds')
     super(image,
@@ -32,7 +32,7 @@ export class Birds extends Sprite {
     const birdWidth = 34
     const birdHeight = 24
     this.birdsWidth = [birdWidth, birdWidth, birdWidth]
-    this.birdHeight = [birdHeight, birdHeight, birdHeight]
+    this.birdsHeight = [birdHeight, birdHeight, birdHeight]
     this.x = [birdX, birdX, birdX]
     this.y = [birdY, birdY, birdY]
     this.lastX = lastX //结束时x坐标
@@ -49,7 +49,7 @@ export class Birds extends Sprite {
   }
 
 
-  initDraw() {
+  draw() {
     //切换三只小鸟的速度
     const changeSpeed = 0.2
     this.count = this.count + changeSpeed
@@ -88,7 +88,7 @@ export class Birds extends Sprite {
         this.clippingX[this.index], this.clippingY[this.index],
         this.clippingWidth[this.index], this.clippingHeight[this.index],
         this.birdsX[this.index], this.birdsY[this.index],
-        this.birdsWidth[this.index], this.birdHeight[this.index]
+        this.birdsWidth[this.index], this.birdsHeight[this.index]
     )
     if (this.text)
       this.drawText()
@@ -100,7 +100,7 @@ export class Birds extends Sprite {
     this.dataStore.ctx.fillText(
         this.text,
         this.birdsX[0] + 2,
-        this.birdsY[0] + this.birdHeight[0] + 15,
+        this.birdsY[0] + this.birdsHeight[0] + 15,
         this.birdsWidth[0]
     )
   }
@@ -115,6 +115,13 @@ export class Birds extends Sprite {
     return 'right'
   }
 
+  /**
+   *
+   * @param lastX 终点的x坐标
+   * @param lastY 终点的y坐标
+   * @param number 小鸟序号
+   * @param location 位置 left 或 right
+   */
   change(lastX, lastY, number, location) {
     this.x = this.birdsX
     this.y = this.birdsY

@@ -21,6 +21,10 @@ export class DataStore {
     return this
   }
 
+  delete(key) {
+    this.map.delete(key)
+  }
+
   get(key) {
     return this.map.get(key)
   }

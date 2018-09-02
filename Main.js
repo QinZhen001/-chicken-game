@@ -6,8 +6,8 @@ import {BackGround} from './js/runtime/BackGround.js'
 import {Birds} from './js/player/Birds.js'
 import {ButtonA} from './js/runtime/ButtonA'
 import {ButtonB} from './js/runtime/ButtonB'
-import {Stone} from './js/runtime/Stone'
 import {StartButton} from './js/player/StartButton'
+import {Stone} from './js/runtime/Stone'
 
 export class Main {
   constructor() {
@@ -36,8 +36,8 @@ export class Main {
         .put('background', BackGround)
         .put('buttonA', ButtonA)
         .put('buttonB', ButtonB)
-        .put('stone', Stone)
         .put('startButton', StartButton)
+        .put('stone', Stone)
         .put('bird1', new Birds(10, thirdY, "用户", 1))    //小鸟的宽是34 高24
         .put('bird2', new Birds(10 + 34 + 25, thirdY, "其他", 2))    //小鸟和小鸟之间的间距是25
         .put('bird3', new Birds(10 + 34 + 25 + 34 + 25, thirdY, "其他", 3))
@@ -56,17 +56,12 @@ export class Main {
         .put('bird16', new Birds(375 - 10 - 34 - 25 - 34 - 25 - 34, firstY, "其他", 16))
         .put('bird17', new Birds(375 - 10 - 34 - 25 - 34, firstY, "其他", 17))
         .put('bird18', new Birds(375 - 10 - 34, firstY, "其他", 18))
-        .put('birdsNum', 18)
+        .put('birdsNum', 18)  //小鸟总数
+        .put('userLocation', 'left') //当前用户所在位置
 
-    // .put('land', Land)
-    // .put('score', Score)
-    // .put('startButton', StartButton);
-
-    //创建铅笔要在游戏逻辑运行之前
-    // this.director.createPencil()
     this.director.run();
-    this.director.registerEvent()
-    // this.director.initAnimation()
+    this.director.registerEvent() //创建事件监听
+    this.director.initAnimation() //初始化动画
   }
 
 }
